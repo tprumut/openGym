@@ -12,6 +12,10 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 28
         versionName "1.4.3"
+        // Set these in gradle.properties for a real Fit 5 Pro app. Empty defaults keep the
+        // open-source build installable while the Huawei bridge remains safely disabled.
+        buildConfigField "String", "HUAWEI_WATCH_PACKAGE", '"' + (project.findProperty("huaweiWatchPackage") ?: "") + '"'
+        buildConfigField "String", "HUAWEI_WATCH_FINGERPRINT", '"' + (project.findProperty("huaweiWatchFingerprint") ?: "") + '"'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -72,6 +76,8 @@ dependencies {
     // Writing workouts and weigh-ins to Health Connect (#200, HealthConnectPlugin). Off until the
     // user turns it on.
     implementation "androidx.health.connect:connect-client:$healthConnectVersion"
+    // Huawei Wear Engine P2P messaging for Lite Wearables such as WATCH FIT 5 Pro.
+    implementation 'com.huawei.hms:wearengine:5.0.2.306'
     // The sharper animations as Play asset packs (AnimationPacksPlugin in src/play): the Play
     // build only. The sideloaded APK has no Play Store behind it and keeps its built-in ones.
     playImplementation "com.google.android.play:asset-delivery:$assetDeliveryVersion"

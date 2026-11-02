@@ -21,6 +21,8 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        // Huawei Wear Engine SDK (used only by HuaweiWatchBridge on Android).
+        maven { url 'https://developer.huawei.com/repo/' }
     }
 }
 

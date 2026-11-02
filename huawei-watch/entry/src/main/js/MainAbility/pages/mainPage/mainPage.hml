@@ -1,0 +1,10 @@
+<div class="container" onswipe="swipeEvent">
+  <text class="brand">openGym</text>
+  <text class="workout">{{ workoutName }}</text>
+  <text class="exercise">{{ exerciseName }}</text>
+  <text class="set">{{ setLabel }}</text>
+  <text class="rest">{{ restLabel }}</text>
+  <text class="status">{{ status }}</text>
+  <text class="last">{{ lastEvent }}</text>
+  <text class="complete" if="{{ canComplete }}" onclick="completeSet">SETİ TAMAMLA</text>
+</div>

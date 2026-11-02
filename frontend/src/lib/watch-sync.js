@@ -1,5 +1,5 @@
-// The Apple Watch link, the page's side (native: ios/App/App/WatchBridgePlugin.swift, the watch
-// app: ios/App/Watch).
+// The watch link. The iOS implementation is WatchBridgePlugin.swift; the Android implementation
+// is HuaweiWatchBridge and talks to a Lite Wearable app through Huawei Wear Engine.
 //
 // Phone → watch: while a workout runs, a snapshot of it (each exercise by name, its sets with
 // weight, reps and done, the rest, where you are) goes to the watch whenever it changes. The watch
@@ -12,8 +12,8 @@
 // id, and only then acknowledged, which takes it out of the native queue; until the workout screen
 // is there to apply it, it waits in that queue.
 //
-// The iPhone app only. Without a paired watch with the app on it, nothing is sent and nothing
-// arrives: the phone behaves exactly as before.
+// Without a paired watch with the app on it, nothing is sent and nothing arrives: the phone behaves
+// exactly as before.
 import { MOBILE, nativePlatform } from './mobile.js'
 import { EXIDX, gifSrc, figureOf, isAssisted } from './exercises.js'
 import { packId, packDrawingId } from './anim-quality.js'
@@ -333,9 +333,14 @@ let pluginP = null
 // Inside an object: a Capacitor plugin proxy answers `then`, so a promise must never resolve with
 // the bare proxy (lib/rest-alert.js, the Coach hang #42).
 const watchPlugin = () => pluginP || (pluginP = (async () => {
-  if (!MOBILE || (await nativePlatform()) !== 'ios') return null
+  if (!MOBILE) return null
+  const platform = await nativePlatform()
+  if (platform !== 'ios' && platform !== 'android') return null
   const { registerPlugin } = await import('@capacitor/core')
-  return { WatchBridge: registerPlugin('WatchBridge') }
+  // Keep the logical bridge name stable in the React code. Android uses a separate native plugin
+  // because Huawei Wear Engine is not available in the iOS target and must not enter that build.
+  const nativeName = platform === 'android' ? 'HuaweiWatchBridge' : 'WatchBridge'
+  return { WatchBridge: registerPlugin(nativeName) }
 })().catch(() => null))
 
 let getStateRef = null

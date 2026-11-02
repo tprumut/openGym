@@ -1,0 +1,16 @@
+.container {
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  background-color: #0b1220;
+}
+.brand { color: #72f2b8; font-size: 18px; margin-bottom: 4px; }
+.workout { color: #c5d0df; font-size: 15px; max-lines: 1; text-overflow: ellipsis; }
+.exercise { color: #ffffff; font-size: 23px; margin: 8px 18px; text-align: center; max-lines: 2; text-overflow: ellipsis; }
+.set { color: #72f2b8; font-size: 22px; margin-bottom: 4px; }
+.rest { color: #f9c74f; font-size: 14px; height: 20px; }
+.status { color: #91a0b5; font-size: 12px; margin: 4px 14px; text-align: center; }
+.last { color: #91a0b5; font-size: 12px; height: 18px; }
+.complete { color: #081016; background-color: #72f2b8; border-radius: 22px; padding: 12px 18px; font-size: 14px; margin-top: 8px; }
