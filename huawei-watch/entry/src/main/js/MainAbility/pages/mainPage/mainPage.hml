@@ -6,5 +6,6 @@
   <text class="rest">{{ restLabel }}</text>
   <text class="status">{{ status }}</text>
   <text class="last">{{ lastEvent }}</text>
+  <text class="start" if="{{ canStart }}" onclick="startWorkout">ANTRENMANI BAŞLAT</text>
   <text class="complete" if="{{ canComplete }}" onclick="completeSet">SETİ TAMAMLA</text>
 </div>

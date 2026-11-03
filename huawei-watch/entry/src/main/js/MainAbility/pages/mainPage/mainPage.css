@@ -13,4 +13,5 @@
 .rest { color: #f9c74f; font-size: 14px; height: 20px; }
 .status { color: #91a0b5; font-size: 12px; margin: 4px 14px; text-align: center; }
 .last { color: #91a0b5; font-size: 12px; height: 18px; }
+.start { color: #081016; background-color: #72f2b8; border-radius: 22px; padding: 12px 18px; font-size: 14px; margin-top: 8px; }
 .complete { color: #081016; background-color: #72f2b8; border-radius: 22px; padding: 12px 18px; font-size: 14px; margin-top: 8px; }

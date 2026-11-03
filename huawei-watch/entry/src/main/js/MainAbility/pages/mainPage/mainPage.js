@@ -37,8 +37,10 @@ export default {
         setLabel: 'Saat uygulamasını açın',
         restLabel: '',
         canComplete: false,
+        canStart: false,
         status: 'Telefonla bağlantı bekleniyor',
         active: null,
+        readySession: null,
         cur: 0,
         setIndex: 0,
         lastEvent: ''
@@ -67,13 +69,17 @@ export default {
             const snapshot = typeof json === 'string' ? JSON.parse(json) : json
             this.active = snapshot && snapshot.active ? snapshot.active : null
             if (!this.active) {
+                this.readySession = snapshot && snapshot.ready && snapshot.ready.today ? snapshot.ready.today : null
                 this.workoutName = 'openGym'
-                this.exerciseName = 'Antrenman yok'
-                this.setLabel = 'Telefonda bir antrenman başlatın'
+                this.exerciseName = this.readySession ? this.readySession.name : 'Antrenman yok'
+                this.setLabel = this.readySession ? `${this.readySession.entries.length} egzersiz hazır` : 'Telefonda bir antrenman başlatın'
                 this.canComplete = false
-                this.status = 'Hazır'
+                this.canStart = !!this.readySession
+                this.status = this.readySession ? 'Bilekten başlatılabilir' : 'Hazır'
                 return
             }
+            this.readySession = null
+            this.canStart = false
             this.workoutName = this.active.name || 'Antrenman'
             this.cur = Math.max(0, this.active.cur || 0)
             const entry = this.active.entries && this.active.entries[this.cur]
@@ -88,6 +94,24 @@ export default {
         } catch (e) {
             this.status = 'Snapshot okunamadı'
         }
+    },
+    startWorkout() {
+        if (!this.readySession || !this.readySession.routineIds) return
+        const event = {
+            id: `fit-start-${Date.now()}`,
+            type: 'start',
+            wid: `fit-workout-${Date.now()}`,
+            routineIds: this.readySession.routineIds,
+            at: Date.now()
+        }
+        const that = this
+        sendWire({ v: WIRE_VERSION, event: event }, function (ok) {
+            that.lastEvent = ok ? 'Antrenman telefonda başlatıldı' : 'Başlatılamadı; tekrar deneyin'
+            if (ok) {
+                that.canStart = false
+                that.status = 'Antrenman başlatılıyor'
+            }
+        })
     },
     completeSet() {
         if (!this.active || !this.canComplete) return

@@ -11,6 +11,7 @@ Bu klasör DevEco Studio ile açılabilen Lite Wearable JavaScript/HML saat uygu
 5. HAP'ı imzalayın ve WATCH FIT 5 Pro'ya yükleyin.
 
 Saat uygulaması telefon eşlikçili MVP'yi uygular: snapshot gösterir ve tamamlanan setleri Wear Engine üzerinden telefona gönderir.
+Telefon aktif bir antrenman çalıştırmıyorsa, günün hazır rutini snapshot içinde varsa saatten antrenman başlatılabilir.
 
 Telefon Android projesi için `frontend/android/gradle.properties` dosyanıza şu iki satırı yerel olarak ekleyin; bu değerleri commit etmeyin:
 
@@ -26,3 +27,5 @@ Telefon tarafında Huawei plugin'i `com.huawei.hms:wearengine:5.0.2.306` kullan�
 Telefon -> saat: `{v:"opengym-fit-v1", type:"snapshot", json:"..."}`
 
 Saat -> telefon: `{v:"opengym-fit-v1", event:{id,type:"setDone",wid,exId,entryIdx,setIdx,w,r,at}}`
+
+Saat -> telefon (hazır rutini başlatma): `{v:"opengym-fit-v1", event:{id,type:"start",wid,routineIds,at}}`
