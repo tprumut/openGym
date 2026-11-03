@@ -133,6 +133,15 @@ public final class HuaweiWatchBridge extends Plugin {
         call.reject(message, error);
     }
 
+    private void emitWatchState(boolean paired, boolean installed, boolean configured, Device target) {
+        JSObject state = new JSObject();
+        state.put("paired", paired);
+        state.put("installed", installed);
+        state.put("configured", configured);
+        if (target != null) state.put("device", target.getName());
+        notifyListeners("watchState", state);
+    }
+
     private void discover(PluginCall call, DeviceCallback callback) {
         if (!configured()) {
             JSObject ret = new JSObject();
@@ -140,6 +149,7 @@ public final class HuaweiWatchBridge extends Plugin {
             ret.put("installed", false);
             ret.put("configured", false);
             call.resolve(ret);
+            emitWatchState(false, false, false, null);
             return;
         }
         try {
@@ -172,6 +182,7 @@ public final class HuaweiWatchBridge extends Plugin {
                 ret.put("installed", false);
                 ret.put("configured", true);
                 call.resolve(ret);
+                emitWatchState(false, false, true, null);
                 return;
             }
             try {
@@ -186,6 +197,7 @@ public final class HuaweiWatchBridge extends Plugin {
                             ret.put("configured", true);
                             ret.put("device", found.getName());
                             call.resolve(ret);
+                            emitWatchState(true, true, true, found);
                             registerReceiver(found);
                         })
                         .addOnFailureListener(error -> {
@@ -195,6 +207,7 @@ public final class HuaweiWatchBridge extends Plugin {
                             ret.put("configured", true);
                             ret.put("device", found.getName());
                             call.resolve(ret);
+                            emitWatchState(true, false, true, found);
                         });
             } catch (Exception e) {
                 fail(call, "Could not query watch app", e);
