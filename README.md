@@ -29,6 +29,14 @@
 
 </div>
 
+> **Huawei WATCH FIT 5 Pro development fork**
+>
+> This fork is being adapted to work with the **HUAWEI WATCH FIT 5 Pro** through a Poco F5 Pro
+> Android phone and Huawei Wear Engine. The Huawei watch app and Android bridge are actively under
+> development; AppGallery Connect approval, signing and real-device validation are still pending.
+> See the [Huawei WATCH FIT 5 Pro integration guide](docs/HUAWEI_WATCH_FIT5_PRO.md) and the
+> [Lite Wearable HAP project](huawei-watch/README.md).
+
 ## Why openGym
 
 Most workout apps keep your data on their servers, push you towards a subscription, or vanish
@@ -117,6 +125,10 @@ if you want to try it before installing anything.
 - An Apple Watch app: tick off sets with the Digital Crown, RPE or RIR right on the wrist, a
   full-screen rest countdown, heart rate per set, a Lock button against stray crown presses, and
   complications.
+- A **HUAWEI WATCH FIT 5 Pro app in development**: view the active workout, start the day's ready
+  routine from the watch, complete sets on the wrist and sync those events back to the Android phone
+  through Huawei Wear Engine. The first target is a phone companion using HMS Core; advanced watch
+  features will follow real-device validation.
 - Widgets and a Live Activity on the iPhone: log a set, skip the rest or jump to the next exercise
   from the Lock Screen without opening the app.
 
@@ -131,12 +143,31 @@ if you want to try it before installing anything.
 
 The full list of what changed release by release is in the [changelog](CHANGELOG.md).
 
+## HUAWEI WATCH FIT 5 Pro integration
+
+This fork keeps the main openGym experience intact while adding a Huawei-specific companion path:
+
+- **Phone:** Android Capacitor app with a native `HuaweiWatchBridge` using Huawei Wear Engine
+  `5.0.2.306`.
+- **Watch:** DevEco Studio Lite Wearable HAP under [`huawei-watch/`](huawei-watch/), targeting the
+  `liteWearable` device type.
+- **Current flow:** the phone sends a compact workout snapshot; the watch can start a ready routine,
+  display the current exercise and set, and send `start`/`setDone` events back to the phone.
+- **Safety:** events are queued on the phone and acknowledged only after openGym applies and saves
+  them, so a temporary connection loss does not silently discard a completed set.
+- **Status:** this is an active development integration, not yet a released or AppGallery-validated
+  feature. It requires a Huawei Developer account, AppGallery Connect signing, Wear Engine setup,
+  HMS Core and a real WATCH FIT 5 Pro for end-to-end testing.
+
+For the package names, signing placeholders, Wear Engine setup and protocol details, read the
+[Huawei integration guide](docs/HUAWEI_WATCH_FIT5_PRO.md) before building the phone APK or HAP.
+
 ## Quick start
 
 You need [Docker](https://docs.docker.com/get-docker/) with Compose.
 
 ```bash
-git clone https://github.com/DuarteSantos8/openGym
+git clone https://github.com/tprumut/openGym
 cd openGym
 cp .env.example .env
 docker compose pull      # prebuilt images, amd64 + arm64 (skip this to build from source)
