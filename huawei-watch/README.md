@@ -16,7 +16,7 @@ Telefon aktif bir antrenman çalıştırmıyorsa, günün hazır rutini snapshot
 Telefon Android projesi için `frontend/android/gradle.properties` dosyanıza şu iki satırı yerel olarak ekleyin; bu değerleri commit etmeyin:
 
 ```properties
-huaweiWatchPackage=ch.duartesantos.opengym.watch
+huaweiWatchPackage=io.github.tprumut.opengym.watch
 huaweiWatchFingerprint=WATCH_APP_FINGERPRINT_FROM_APPGALLERY_CONNECT
 ```
 

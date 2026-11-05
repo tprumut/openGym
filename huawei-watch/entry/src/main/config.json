@@ -1,6 +1,6 @@
 {
   "app": {
-    "bundleName": "ch.duartesantos.opengym.watch",
+    "bundleName": "io.github.tprumut.opengym.watch",
     "vendor": "openGym",
     "version": { "code": 1000000, "name": "0.1.0" }
   },
@@ -20,7 +20,7 @@
     "metaData": {
       "customizeData": [{
         "name": "supportLists",
-        "value": "ch.duartesantos.opengym:REPLACE_WITH_PHONE_APP_FINGERPRINT",
+        "value": "io.github.tprumut.opengym:REPLACE_WITH_PHONE_APP_FINGERPRINT",
         "extra": ""
       }]
     },

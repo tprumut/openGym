@@ -1,5 +1,5 @@
 {
-  "appId": "ch.duartesantos.opengym",
+  "appId": "io.github.tprumut.opengym",
   "appName": "openGym",
   "webDir": "dist",
   "backgroundColor": "#0c0e12",
