@@ -24,6 +24,7 @@ import { t, tn, LANGS, INSTR_LANGS, EXERCISE_NAME_LANGS, baseLang, dateLocale } 
 import { effectiveLang } from '../lib/default-lang.js'
 import { DEMO, REPO } from '../lib/demo.js'
 import { MOBILE, isAndroid, shareExport, shareExportBlob, syncReminder } from '../lib/mobile.js'
+import { watchStatus, watchStart, watchStop, watchSyncNow, watchOpenSettings } from '../lib/watch-bridge.js'
 import { NUDGE_COPY, NUDGE_TONES, toneOf } from '../lib/nudge.js'
 import { referencedFiles } from '../lib/media-refs.js'
 import { mediaStore } from '../lib/media-store.js'
@@ -928,6 +929,7 @@ export default function Settings({ page = null, find = null, via = null, entryKe
         {MOBILE && android && S.autoBackup && <BackupFolderRow />}
       </Section>
       {MOBILE && <HealthConnectCard S={S} toast={toast} android={android} />}
+      {MOBILE && android && <HuaweiWatchCard toast={toast} />}
       <Section title={t('Bring data in')}>
         <Row icon="download" iconTint="var(--teal)" title={t('Import backup')} accessory="chevron" onClick={() => fileRef.current.click()} />
         <Row icon="download" iconTint="var(--teal)" title={t('Import from another app')}
@@ -1247,6 +1249,88 @@ function effortHelpSheet() {
 function NotificationsCard({ S, update, toast }) {
   if (MOBILE) return <MobileReminderCard S={S} update={update} toast={toast} />
   return <PushCard S={S} update={update} toast={toast} />
+}
+
+// Huawei watch bridge. The service lives inside this same app (WatchBridgePlugin/P2pService),
+// so there is no second app to install: the switch starts and stops it, and the rows below show
+// the link the native side reports. Only shown on Android, where the plugin exists.
+function HuaweiWatchCard({ toast }) {
+  const [state, setState] = useState(null)
+  const [busy, setBusy] = useState(false)
+
+  const refresh = async () => {
+    const next = await watchStatus()
+    if (next) setState(next)
+  }
+
+  useEffect(() => {
+    let alive = true
+    const tick = async () => {
+      const next = await watchStatus()
+      if (alive && next) setState(next)
+    }
+    tick()
+    const id = setInterval(tick, 2000)
+    return () => { alive = false; clearInterval(id) }
+  }, [])
+
+  const enabled = state ? !!state.enabled : false
+  const connected = !!(state?.running && state?.link === 'ready')
+  const perms = state && (!state.bluetooth || !state.notifications || state.location === false)
+  const last = state?.lastSync
+    ? new Date(state.lastSync).toLocaleString(dateLocale(), { dateStyle: 'short', timeStyle: 'short' })
+    : null
+  const title = !enabled ? t('Watch sync off')
+    : connected ? t('Watch connected')
+    : state?.link === 'syncing' ? t('Syncing…')
+    : state?.link === 'auth' ? t('Open openGym on the phone')
+    : state?.link === 'error' ? t('Watch sync error')
+    : state?.link === 'offline' ? t('Watch not connected')
+    : t('Looking for the watch')
+
+  const toggle = async on => {
+    setBusy(true)
+    try {
+      if (on) await watchStart(); else await watchStop()
+      await refresh()
+    } catch (e) {
+      toast(e?.message || t('Could not change watch settings'))
+    } finally { setBusy(false) }
+  }
+
+  const syncNow = async () => {
+    setBusy(true)
+    try {
+      await watchSyncNow()
+      toast(t('Sync requested'))
+      await refresh()
+    } catch (e) {
+      toast(e?.message || t('Sync failed'))
+    } finally { setBusy(false) }
+  }
+
+  const openSettings = () => {
+    watchOpenSettings().catch(() => toast(t('Could not open settings')))
+  }
+
+  return <Section title={t('Huawei Watch')} footer={t('Sync your plan and workouts through the bridge inside openGym — no separate app.')}>
+    <Row icon="link" iconTint="var(--teal)" title={t('Watch bridge')}
+      subtitle={t('Connect openGym to your Huawei watch.')}>
+      <Switch checked={enabled} disabled={busy} onChange={toggle} />
+    </Row>
+    <Row icon={connected ? 'checkCircle' : 'clock'} iconTint={connected ? 'var(--acc)' : 'var(--grey)'}
+      title={title} subtitle={state?.detail ? t(state.detail) : null} />
+    {perms && <Row icon="shield" iconTint="var(--red)" title={t('Permissions needed')}
+      subtitle={!state.bluetooth
+        ? t('Bluetooth permission is required to reach the watch')
+        : state.location === false
+          ? t('Location permission is needed to find the watch on Android 10-11')
+          : t('Notification permission is needed for the sync status')}
+      accessory="chevron" onClick={openSettings} />}
+    <Row icon="reset" iconTint="var(--blue)" title={t('Sync now')}
+      subtitle={last ? t('Last sync: {0}', last) : t('Never synced')}
+      accessory={enabled && !busy ? 'chevron' : 'none'} onClick={enabled && !busy ? syncNow : undefined} />
+  </Section>
 }
 
 // Mobile build: the reminder is a native local notification scheduled on planned weekdays —

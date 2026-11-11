@@ -30,6 +30,8 @@ import { DEFAULT_TEMPLATE_ID } from '../lib/structuralBalanceTemplates.js'
 import { WC_DEFAULT } from '../lib/workout-controls.js'
 import { sanitizeAccent } from '../lib/accent.js'
 import { registerExerciseAliases } from '../lib/exercise-aliases.js'
+import { activeSnapshot, watchPushActive } from '../lib/watch-bridge.js'
+import { supersetUnits, unitOf } from '../lib/history.js'
 
 const KEY = 'gym_state_v1'
 // Where the saved copy stands with the server: the revision it descends from, and its own `_ts`
@@ -664,6 +666,9 @@ export const useStore = create((set, get) => {
     // iOS ending it in the background before the page's timers run again) lost the last set.
     const workoutMoved = MOBILE && JSON.stringify(get()?.S?.active ?? null) !== JSON.stringify(S.active ?? null)
     set({ S })
+    // The watch shows a compact copy of the active workout. Push it whenever the copy changes;
+    // watch-bridge.js drops a snapshot identical to the last one, so a keystroke is not a message.
+    if (MOBILE) watchPushActive(activeSnapshot(S))
     // A copy that replaces the last one wholesale and keeps an older stamp — adopted from the
     // server — goes to the file at once. Until it does, the file holds the copy it replaced,
     // which looks newer, and a start in between would take that one back (restoreFromMirror).
@@ -2106,5 +2111,42 @@ export const useStore = create((set, get) => {
     }
   }
 })
+
+// Native watch sync reads and writes the same state the UI uses. P2pService calls these from the
+// Android side; replaceState keeps React and the file mirror in step. The bridge never writes a
+// finished workout itself: it asks the store, so the server sync and the backup run as usual.
+if (typeof window !== 'undefined') {
+  window.__openGymWatch = {
+    getState: () => JSON.stringify(useStore.getState().S),
+    getActive: () => JSON.stringify(activeSnapshot(useStore.getState().S)),
+    setState: (json) => {
+      try {
+        const next = typeof json === 'string' ? JSON.parse(json) : json
+        useStore.getState().replaceState(next, false)
+        return true
+      } catch (e) { return false }
+    },
+    completeCurrent: () => {
+      const A = useStore.getState().S.active
+      if (!A) return JSON.stringify({ ok: false, error: 'No active workout' })
+      useStore.getState().update(s => {
+        const a = s.active
+        if (!a || !a.entries.length) return
+        const units = supersetUnits(a.entries)
+        const cur = Math.min(Math.max(0, a.cur || 0), a.entries.length - 1)
+        const unit = unitOf(units, cur)
+        const unitIdx = units.findIndex(u => u === unit)
+        unit.forEach(i => {
+          const e = a.entries[i]
+          e.sets.forEach(set => { set.done = true })
+          const mx = Math.max(0, ...e.sets.map(set => set.w || 0))
+          if (mx > 0) e.topW = mx
+        })
+        if (unitIdx >= 0 && unitIdx < units.length - 1) a.cur = units[unitIdx + 1][0]
+      })
+      return JSON.stringify({ ok: true, active: activeSnapshot(useStore.getState().S) })
+    }
+  }
+}
 
 export { hasData }
