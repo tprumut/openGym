@@ -37,6 +37,15 @@ private data directory on every change (iOS is allowed to evict WebView storage 
 pressure; the file mirror is the durable copy and is restored on launch). Backups go out
 through the OS share sheet instead of a browser download.
 
+### Huawei watches
+
+The Android build can drive a Huawei watch (Wear Engine P2P, Watch Fit 5 Pro): the watch
+shows the current exercise and logs the workout, the phone runs openGym's own planner and
+merges the result into the normal state. It is a switch under Settings → Data, off until
+turned on, and needs nothing installed on the phone beyond the app itself. Building it (the
+HMS app id, the watch bundle and fingerprint in `local.properties`) and how the pieces fit
+is in [HUAWEI_WATCH.md](HUAWEI_WATCH.md).
+
 ### Connecting the app to your own server
 
 On first launch the app asks how you want to use it. Alongside the fully local mode above,
