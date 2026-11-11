@@ -113,6 +113,21 @@
         <!-- Gym check-in scanner (@capacitor-mlkit/barcode-scanning): pre-fetch the ML Kit
              barcode model at install time so the first scan doesn't wait on a download. -->
         <meta-data android:name="com.google.mlkit.vision.DEPENDENCIES" android:value="barcode_ui" />
+
+        <!-- Huawei Wear Engine: the app id AGC registered for this package (build.gradle
+             manifestPlaceholders.hmsAppId, from local.properties hms.app.id). -->
+        <meta-data
+            android:name="com.huawei.hms.client.appid"
+            android:value="${hmsAppId}" />
+
+        <!-- Huawei watch sync (WatchBridgeController/P2pService). A foreground service so the
+             Wear Engine link survives the WebView being frozen; connectedDevice names the type
+             Android 14 asks for. -->
+        <service
+            android:name="ch.duartesantos.opengym.watch.P2pService"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice"
+            android:stopWithTask="false" />
     </application>
 
     <!-- Permissions -->
@@ -174,8 +189,21 @@
     <uses-feature android:name="android.hardware.location.gps" android:required="false" />
     <uses-feature android:name="android.hardware.location.network" android:required="false" />
 
-    <!-- Whether the Health Connect app is there, on Android 13 and lower. -->
+    <!-- Huawei watch sync over Wear Engine P2P. The Bluetooth pair is only for Android 11 and
+         lower: 12+ uses the Nearby devices permissions instead. Location (declared above for the
+         gym reminder) is what discovery needs on 10-11. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation" />
+
+    <!-- Whether the Huawei Health app is there, for the watch pairing hint; and the Health
+         Connect app, on Android 13 and lower. -->
     <queries>
+        <package android:name="com.huawei.health" />
         <package android:name="com.google.android.apps.healthdata" />
     </queries>
 </manifest>

@@ -8,4 +8,7 @@
     <string name="rest_channel_name">Rest timer</string>
     <string name="rest_quiet_channel_name">Rest timer, without vibration</string>
     <string name="rest_channel_desc">Rest between sets, in the notification shade. The lock screen shows it only when notifications are allowed there.</string>
+    <string name="notif_title">openGym watch sync</string>
+    <string name="notif_text">Watching for the watch connection</string>
+    <string name="notif_sync">Sync now</string>
 </resources>

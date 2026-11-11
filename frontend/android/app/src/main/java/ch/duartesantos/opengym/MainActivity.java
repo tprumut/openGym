@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.WebViewListener;
+import ch.duartesantos.opengym.watch.WatchBridgePlugin;
 
 public class MainActivity extends BridgeActivity {
     // How much of the status bar (or the camera cutout) and of the navigation bar lies over the
@@ -36,8 +37,27 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AnimationPacksPlugin.class);
         registerPlugin(NudgeCheckPlugin.class);
         registerPlugin(GymReminderPlugin.class);
+        registerPlugin(WatchBridgePlugin.class);
         super.onCreate(savedInstanceState);
         passSystemBarsToPage();
+        WatchBridgeController.INSTANCE.onCreate(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        WatchBridgeController.INSTANCE.onResume(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        WatchBridgeController.INSTANCE.onRequestPermissionsResult(this, requestCode, grantResults);
+    }
+
+    /** For WatchBridgeController: the bridge (and its WebView) is protected in BridgeActivity. */
+    WebView bridgeWebView() {
+        return bridge == null ? null : bridge.getWebView();
     }
 
     @Override
